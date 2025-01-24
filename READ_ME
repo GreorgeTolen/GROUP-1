@@ -1,0 +1,47 @@
+Explanation
+
+1. Block Class
+This class represents an individual block in the blockchain.
+
+Attributes:
+
+index: Position of the block in the chain.
+timestamp: The date and time when the block was created.
+data: The information stored in the block (e.g., transaction details).
+previous_hash: The hash of the previous block in the chain.
+hash: The block's own hash, calculated using its attributes.
+Methods:
+
+calculate_hash(): Combines the block’s attributes into a single string and computes a hash using SHA-256. This ensures the block’s integrity.
+
+2. Blockchain Class
+This class represents the chain of blocks.
+
+Attributes:
+
+chain: A list of blocks in the blockchain.
+Methods:
+
+create_genesis_block(): Creates the first block in the blockchain, called the genesis block. It has a fixed previous hash of "0".
+get_latest_block(): Retrieves the most recent block in the chain.
+add_block(data): Creates a new block using the data provided, links it to the previous block, and appends it to the chain.
+3. BlockchainExplorer Class
+This class provides a GUI for viewing the blockchain using the Tkinter library.
+
+GUI Components:
+
+TreeView: Displays the blockchain in a tabular format.
+Columns:
+Address: The block’s hash.
+Timestamp: When the block was created.
+Data: The information stored in the block.
+Validation: Shows whether the block’s hash is valid by recalculating it.
+Methods:
+
+show_gui(): Creates and displays the GUI window with the blockchain data.
+
+4. Example Usage
+The main function demonstrates how to use the Blockchain and BlockchainExplorer classes.
+A Blockchain object is created.
+Three blocks are added with sample data.
+A BlockchainExplorer object is created to display the blockchain in a GUI.

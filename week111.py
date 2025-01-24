@@ -54,7 +54,6 @@ class BlockchainExplorer:
         tree.pack(expand=True, fill=tk.BOTH)
         root.mainloop()
 
-
 # Example Usage
 if __name__ == "__main__":
     bc = Blockchain()
