@@ -64,3 +64,4 @@ if __name__ == "__main__":
 
     explorer = BlockchainExplorer(bc)
     explorer.show_gui()
+
