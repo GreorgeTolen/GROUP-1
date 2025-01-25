@@ -32,6 +32,7 @@ class Blockchain:
         new_block = Block(len(self.chain), time.ctime(), data, previous_block.hash)
         self.chain.append(new_block)
 
+
 class BlockchainExplorer:
     def __init__(self, blockchain):
         self.blockchain = blockchain
@@ -63,4 +64,3 @@ if __name__ == "__main__":
 
     explorer = BlockchainExplorer(bc)
     explorer.show_gui()
-

@@ -1,0 +1,33 @@
+Explanation
+
+1. Block Class
+This class defines what each block in the blockchain looks like.
+Each block:
+
+Stores its data, timestamp, hash (its unique ID), and the hash of the previous block.
+Creates its hash by combining its data and using a simple math function to generate a unique value.
+2. Blockchain Class
+This manages the whole chain of blocks.
+It can:
+
+Create the first block (called the genesis block).
+Add new blocks to the chain by linking them to the previous block.
+Validate the chain by checking:
+Each block correctly points to the previous block.
+Each block's hash is valid (hasn’t been tampered with).
+3. Graphical User Interface (GUI)
+The GUI allows you to interact with the blockchain:
+
+Add new blocks by typing data into a text box and clicking a button.
+See all blocks in the blockchain, including:
+Each block's unique hash (address).
+Timestamp of when it was created.
+Its data.
+Whether the chain is valid or invalid.
+4. How the Chain Stays Valid
+When you add a new block:
+
+Its hash depends on its data and the hash of the previous block.
+If someone tries to change any block’s data, the hash will no longer match, and the chain will become invalid.
+5. Genesis Block
+The first block in the blockchain is created automatically when the program starts. It has no "previous block," so its previous hash is set to "0".
