@@ -1,7 +1,7 @@
 import time
 import tkinter as tk
 from tkinter import messagebox
-
+#1
 
 class Block:
     def __init__(self, data: str, previous_hash: str = '0'):
