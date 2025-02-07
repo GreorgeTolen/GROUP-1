@@ -155,7 +155,7 @@ def add_new_block_gui():
 
     amount = int(amount)
     if blockchain.utxo.get(sender, 0) < amount:
-        messagebox.showwarning("Balance Error", "Insufficient balance!")
+        messagebox.showwarning("Balance Error", "Insufficient balance!!!")
         return
 
     # Подпись транзакции
