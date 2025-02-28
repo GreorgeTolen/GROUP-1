@@ -2,13 +2,14 @@ import hashlib
 import time
 import tkinter as tk
 from tkinter import messagebox
+from tkinter import ttk
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography.hazmat.primitives import hashes
 import random
 
 # Константы
 DIFFICULTY = 4         # Используется для PoW (остается для сравнения, но для PoS не применяется)
-MINING_REWARD = 50     # Вознаграждение за создание блока (для PoS – staking reward)
+MINING_REWARD = 50     # Вознаграждение за майнинг (для PoS – staking reward)
 
 # --- Класс транзакции ---
 class Transaction:
@@ -91,7 +92,7 @@ class Blockchain:
             Transaction("System", "Alice", 100),
             Transaction("System", "Bob", 100),
         ]
-        genesis_block = Block(transactions=genesis_transactions, miner="System", difficulty=self.stakes, pos=True)
+        genesis_block = Block(transactions=genesis_transactions, miner="System", difficulty=DIFFICULTY, pos=True)
         self.chain.append(genesis_block)
         self.update_utxo(genesis_transactions)
 
@@ -101,7 +102,7 @@ class Blockchain:
         transactions.insert(0, reward_tx)
         previous_block = self.chain[-1]
         new_block = Block(transactions=transactions, previous_hash=previous_block.hash,
-                          miner=validator_address, difficulty=self.stakes, pos=True)
+                          miner=validator_address, difficulty=DIFFICULTY, pos=True)
         self.chain.append(new_block)
         self.update_utxo(new_block.transactions)
         return new_block
@@ -276,21 +277,19 @@ def update_gui():
         transactions_info = "\n".join(
             [f"Sender: {tx.sender}, Receiver: {tx.receiver}, Amount: {tx.amount}" for tx in block.transactions]
         )
-        block_label = tk.Label(
+        block_label = ttk.Label(
             block_list_frame,
             text=(f"Block Hash: {block.hash}\n"
                   f"Timestamp: {block.timestamp}\n"
-                  f"Miner/Validator: {block.miner}\n"
+                  f"Validator: {block.miner}\n"
                   f"Nonce: {block.nonce}\n"
                   f"Merkle Root: {block.merkle_root}\n"
                   f"Previous Hash: {block.previous_hash}\n"
                   f"Transactions:\n{transactions_info}\n"),
             justify="left",
-            anchor="w",
-            borderwidth=2,
-            relief="groove",
-            padx=5,
-            pady=5,
+            background="#e1e1e1",
+            relief="ridge",
+            padding=5
         )
         block_label.pack(fill=tk.X, pady=2)
     root.after(1000, update_gui)
@@ -300,55 +299,64 @@ def check_balances():
     stakes = "\n".join([f"{user}: {amount} coins staked" for user, amount in primary_node.blockchain.stakes.items()])
     messagebox.showinfo("Balances & Stakes", f"Current balances:\n{balances}\n\nStakes:\n{stakes}")
 
-# --- GUI Setup с прокруткой ---
+# --- GUI Setup ---
 private_keys = {}
 
 root = tk.Tk()
-root.title("Blockchain Explorer with PoS")
+root.title("Decentralized Blockchain Explorer with PoS")
+root.configure(bg="#f5f5f5")
+style = ttk.Style(root)
+style.theme_use("clam")
+style.configure("TLabel", background="#f5f5f5", font=("Helvetica", 10))
+style.configure("TButton", font=("Helvetica", 10, "bold"))
 
-input_frame = tk.Frame(root)
-input_frame.pack(pady=10)
+# Header Frame
+header_frame = ttk.Frame(root, padding=10)
+header_frame.pack(fill=tk.X)
+header_label = ttk.Label(header_frame, text="Blockchain Explorer with PoS", font=("Helvetica", 16, "bold"))
+header_label.pack()
 
-tk.Label(input_frame, text="Sender Address:").grid(row=0, column=0, padx=5, pady=5)
-sender_entry = tk.Entry(input_frame, width=30)
+# Input Frame
+input_frame = ttk.Frame(root, padding=10)
+input_frame.pack(pady=5, fill=tk.X)
+
+ttk.Label(input_frame, text="Sender Address:").grid(row=0, column=0, padx=5, pady=5, sticky="w")
+sender_entry = ttk.Entry(input_frame, width=30)
 sender_entry.grid(row=0, column=1, padx=5, pady=5)
 
-tk.Label(input_frame, text="Receiver Address:").grid(row=1, column=0, padx=5, pady=5)
-receiver_entry = tk.Entry(input_frame, width=30)
+ttk.Label(input_frame, text="Receiver Address:").grid(row=1, column=0, padx=5, pady=5, sticky="w")
+receiver_entry = ttk.Entry(input_frame, width=30)
 receiver_entry.grid(row=1, column=1, padx=5, pady=5)
 
-tk.Label(input_frame, text="Amount:").grid(row=2, column=0, padx=5, pady=5)
-amount_entry = tk.Entry(input_frame, width=30)
+ttk.Label(input_frame, text="Amount:").grid(row=2, column=0, padx=5, pady=5, sticky="w")
+amount_entry = ttk.Entry(input_frame, width=30)
 amount_entry.grid(row=2, column=1, padx=5, pady=5)
 
-tk.Label(input_frame, text="User for Keys/Staking:").grid(row=3, column=0, padx=5, pady=5)
-user_entry = tk.Entry(input_frame, width=30)
+ttk.Label(input_frame, text="User for Keys/Staking:").grid(row=3, column=0, padx=5, pady=5, sticky="w")
+user_entry = ttk.Entry(input_frame, width=30)
 user_entry.grid(row=3, column=1, padx=5, pady=5)
 
-tk.Label(input_frame, text="Stake Amount:").grid(row=4, column=0, padx=5, pady=5)
-stake_entry = tk.Entry(input_frame, width=30)
+ttk.Label(input_frame, text="Stake Amount:").grid(row=4, column=0, padx=5, pady=5, sticky="w")
+stake_entry = ttk.Entry(input_frame, width=30)
 stake_entry.grid(row=4, column=1, padx=5, pady=5)
 
-add_block_button = tk.Button(root, text="Submit Transaction & Validate Block (PoS)", command=add_new_block_pos_gui)
-add_block_button.pack(pady=10)
+# Buttons Frame
+buttons_frame = ttk.Frame(root, padding=10)
+buttons_frame.pack(pady=5, fill=tk.X)
 
-generate_keys_button = tk.Button(root, text="Generate Keys", command=generate_keys_gui)
-generate_keys_button.pack(pady=5)
+ttk.Button(buttons_frame, text="Submit Transaction & Validate Block (PoS)", command=add_new_block_pos_gui).pack(side=tk.LEFT, padx=5)
+ttk.Button(buttons_frame, text="Generate Keys", command=generate_keys_gui).pack(side=tk.LEFT, padx=5)
+ttk.Button(buttons_frame, text="Stake Coins", command=stake_coins_gui).pack(side=tk.LEFT, padx=5)
+ttk.Button(buttons_frame, text="Check Balances & Stakes", command=check_balances).pack(side=tk.LEFT, padx=5)
 
-stake_button = tk.Button(root, text="Stake Coins", command=stake_coins_gui)
-stake_button.pack(pady=5)
-
-check_balance_button = tk.Button(root, text="Check Balances & Stakes", command=check_balances)
-check_balance_button.pack(pady=5)
-
-# Создаем область с прокруткой для списка блоков
-canvas = tk.Canvas(root, height=300)
-canvas.pack(fill=tk.BOTH, expand=True)
-scrollbar = tk.Scrollbar(root, orient="vertical", command=canvas.yview)
+# Scrollable Block List Frame
+canvas = tk.Canvas(root, height=300, bg="#f5f5f5")
+canvas.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+scrollbar = ttk.Scrollbar(root, orient="vertical", command=canvas.yview)
 scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 canvas.configure(yscrollcommand=scrollbar.set)
 canvas.bind('<Configure>', lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
-block_list_frame = tk.Frame(canvas)
+block_list_frame = ttk.Frame(canvas)
 canvas.create_window((0,0), window=block_list_frame, anchor="nw")
 
 update_gui()
