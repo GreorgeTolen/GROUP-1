@@ -38,7 +38,7 @@ class Block:
         self.nonce = 0
         self.miner = miner
         self.difficulty = difficulty
-        # Если PoS, то сразу вычисляем хэш, иначе выполняем PoW
+        # Если PoS, сразу вычисляем хэш, иначе выполняем PoW
         if pos:
             self.hash = self.calculate_hash()
         else:
@@ -53,7 +53,7 @@ class Block:
             if len(tx_hashes) % 2 != 0:
                 tx_hashes.append(tx_hashes[-1])
             tx_hashes = [
-                hashlib.sha256((tx_hashes[i] + tx_hashes[i + 1]).encode()).hexdigest()
+                hashlib.sha256((tx_hashes[i] + tx_hashes[i + 1]).encode("utf-8")).hexdigest()
                 for i in range(0, len(tx_hashes), 2)
             ]
         return tx_hashes[0]
@@ -89,8 +89,8 @@ class Blockchain:
     def create_genesis_block(self):
         self.utxo["System"] = 1000
         genesis_transactions = [
-            Transaction("System", "Alice", 100),
-            Transaction("System", "Bob", 100),
+            Transaction("System", "Tolik", 100),
+            Transaction("System", "Ernar", 100),
         ]
         genesis_block = Block(transactions=genesis_transactions, miner="System", difficulty=DIFFICULTY, pos=True)
         self.chain.append(genesis_block)
@@ -99,9 +99,10 @@ class Blockchain:
     def add_block_pos(self, transactions, validator_address):
         # Добавляем транзакцию вознаграждения за блок (staking reward)
         reward_tx = Transaction("System", validator_address, MINING_REWARD)
-        transactions.insert(0, reward_tx)
+        # Создаем копию списка, чтобы не изменять исходный список транзакций
+        txs = [reward_tx] + transactions
         previous_block = self.chain[-1]
-        new_block = Block(transactions=transactions, previous_hash=previous_block.hash,
+        new_block = Block(transactions=txs, previous_hash=previous_block.hash,
                           miner=validator_address, difficulty=DIFFICULTY, pos=True)
         self.chain.append(new_block)
         self.update_utxo(new_block.transactions)
@@ -270,6 +271,7 @@ def clear_inputs():
     user_entry.delete(0, tk.END)
 
 def update_gui():
+    # Очищаем содержимое фрейма блоков
     for widget in block_list_frame.winfo_children():
         widget.destroy()
 
@@ -277,21 +279,21 @@ def update_gui():
         transactions_info = "\n".join(
             [f"Sender: {tx.sender}, Receiver: {tx.receiver}, Amount: {tx.amount}" for tx in block.transactions]
         )
-        block_label = ttk.Label(
-            block_list_frame,
-            text=(f"Block Hash: {block.hash}\n"
-                  f"Timestamp: {block.timestamp}\n"
-                  f"Validator: {block.miner}\n"
-                  f"Nonce: {block.nonce}\n"
-                  f"Merkle Root: {block.merkle_root}\n"
-                  f"Previous Hash: {block.previous_hash}\n"
-                  f"Transactions:\n{transactions_info}\n"),
-            justify="left",
-            background="#e1e1e1",
-            relief="ridge",
-            padding=5
+        block_text = (
+            f"Block Hash: {block.hash}\n"
+            f"Timestamp: {block.timestamp}\n"
+            f"Validator: {block.miner}\n"
+            f"Nonce: {block.nonce}\n"
+            f"Merkle Root: {block.merkle_root}\n"
+            f"Previous Hash: {block.previous_hash}\n"
+            f"Transactions:\n{transactions_info}\n"
         )
-        block_label.pack(fill=tk.X, pady=2)
+        label = ttk.Label(block_list_frame, text=block_text, justify="left",
+                          background="#e1e1e1", relief="ridge", padding=5)
+        label.pack(fill=tk.X, pady=2)
+
+    # Обновляем область прокрутки
+    canvas.configure(scrollregion=canvas.bbox("all"))
     root.after(1000, update_gui)
 
 def check_balances():
